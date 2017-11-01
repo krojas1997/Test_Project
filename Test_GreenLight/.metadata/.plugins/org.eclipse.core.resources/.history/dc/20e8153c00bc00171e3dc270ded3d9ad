@@ -1,0 +1,47 @@
+package utils;
+
+import java.sql.*;
+import java.util.ArrayList;
+
+import bean.libro;
+
+
+public class MysqlDBConexion {
+
+	public Connection getConexion() {
+		Connection cnx = null;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			cnx = DriverManager.getConnection("jdbc:mysql://localhost/Biblioteca", "root", "mysql");
+		} catch (Exception e) {
+			System.out.println("Error: " + e);
+		}
+		return cnx;
+	}
+	
+	public ArrayList<libro> cargarRecomendados(String categoria) throws SQLException {
+		ArrayList<libro> pr = new ArrayList<libro>();
+		libro bean = null;
+		Connection cn = null;
+
+		try {
+			cn = new MysqlDBConexion().getConexion();
+			Statement sta = cn.createStatement();
+			ResultSet rs = sta.executeQuery("select nombre_libro,ruta_imagen,ruta_pdf,nombre_Autor from libros a join autores b where a.codigo_autor=b.codigo_autor and genero='"+categoria+"'");
+			
+			while (rs.next()) {
+				bean = new libro(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4));
+				pr.add(bean);
+				
+			}
+			sta.close();
+			rs.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		} finally {
+         cn.close();
+		}
+		return pr;
+	}	
+}
